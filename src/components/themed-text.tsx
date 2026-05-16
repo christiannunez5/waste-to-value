@@ -15,6 +15,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
     <Text
       style={[
         { color: theme[themeColor ?? 'text'] },
+        styles.base,
         type === 'default' && styles.default,
         type === 'title' && styles.title,
         type === 'small' && styles.small,
@@ -31,6 +32,9 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
 }
 
 const styles = StyleSheet.create({
+  base: {
+    fontFamily: Fonts.sans,
+  },
   small: {
     fontSize: 14,
     lineHeight: 20,
@@ -66,7 +70,7 @@ const styles = StyleSheet.create({
     color: '#3c87f7',
   },
   code: {
-    fontFamily: Fonts.mono,
+    fontFamily: Fonts.sans,
     fontWeight: Platform.select({ android: 700 }) ?? 500,
     fontSize: 12,
   },
