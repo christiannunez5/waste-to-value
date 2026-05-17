@@ -5,7 +5,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BodyText, Card, LoadingState, Pill, Screen, SectionTitle } from '@/components/waste-ui';
 import { Fonts, Spacing } from '@/constants/theme';
-import { getLeaderboard, LeaderboardRow } from '@/lib/database';
+import { getLeaderboard } from '@/lib/database';
+import type { LeaderboardRow } from '@/types/leaderboard';
 import { formatWeight, getEcoBadge } from '@/lib/recycling';
 import { useAuth } from '@/providers/auth-provider';
 

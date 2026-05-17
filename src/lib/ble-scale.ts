@@ -1,16 +1,11 @@
 import React from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 
+import type { BleDevice, BleStatus } from '@/types/ble-scale';
+
 export const ESP32_SCALE_SERVICE_UUID = '7e400001-b5a3-f393-e0a9-e50e24dcca9e';
 export const ESP32_SCALE_WEIGHT_CHARACTERISTIC_UUID = '7e400003-b5a3-f393-e0a9-e50e24dcca9e';
 export const ESP32_SCALE_DEVICE_NAME = 'WasteScale';
-
-type BleDevice = {
-  id: string;
-  name: string | null;
-};
-
-type BleStatus = 'idle' | 'unsupported' | 'permission-denied' | 'scanning' | 'connected' | 'error';
 
 function decodeBase64(value: string) {
   const atob = globalThis.atob;

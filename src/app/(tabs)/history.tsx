@@ -4,7 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { BodyText, Card, EmptyState, LoadingState, Screen, SectionTitle } from '@/components/waste-ui';
 import { Fonts, Spacing } from '@/constants/theme';
-import { getTransactions, RecyclingTransaction } from '@/lib/database';
+import { getTransactions } from '@/lib/database';
+import type { RecyclingTransaction } from '@/types/recycling-transaction';
 import { formatWeight } from '@/lib/recycling';
 import { useAuth } from '@/providers/auth-provider';
 
