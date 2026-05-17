@@ -7,7 +7,8 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useBleScale } from '@/lib/ble-scale';
 import { addRecyclingTransaction } from '@/lib/database';
-import { calculatePoints, MATERIAL_MULTIPLIERS, WasteType } from '@/lib/recycling';
+import { calculatePoints, MATERIAL_MULTIPLIERS } from '@/lib/recycling';
+import type { WasteType } from '@/types/recycling';
 import { useAuth } from '@/providers/auth-provider';
 
 const DEFAULT_WASTE_TYPE: WasteType = 'Sachet';

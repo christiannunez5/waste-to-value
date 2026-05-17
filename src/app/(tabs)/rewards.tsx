@@ -5,7 +5,9 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { BodyText, Card, EmptyState, LoadingState, PrimaryButton, Screen, SectionTitle } from '@/components/waste-ui';
 import { Fonts, Spacing } from '@/constants/theme';
-import { getRedemptions, getRewards, redeemReward, Redemption, Reward } from '@/lib/database';
+import { getRedemptions, getRewards, redeemReward } from '@/lib/database';
+import type { Redemption } from '@/types/redemption';
+import type { Reward } from '@/types/reward';
 import { formatDateTime } from '@/lib/recycling';
 import { useAuth } from '@/providers/auth-provider';
 

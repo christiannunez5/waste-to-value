@@ -6,17 +6,9 @@ import {
   initializeDatabase,
   loginUser,
   registerUser,
-  User,
 } from '@/lib/database';
-
-type AuthContextValue = {
-  user: User | null;
-  initializing: boolean;
-  signIn: (username: string, password: string) => Promise<void>;
-  signUp: (username: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  refreshUser: () => Promise<void>;
-};
+import type { AuthContextValue } from '@/types/auth';
+import type { User } from '@/types/user';
 
 const SESSION_KEY = 'waste-to-value-user-id';
 const AuthContext = React.createContext<AuthContextValue | null>(null);

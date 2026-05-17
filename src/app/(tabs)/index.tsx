@@ -5,7 +5,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BodyText, Card, EmptyState, LoadingState, Screen, SectionTitle } from '@/components/waste-ui';
 import { Fonts, Spacing } from '@/constants/theme';
-import { getTransactions, getWeeklyStats, RecyclingTransaction } from '@/lib/database';
+import { getTransactions, getWeeklyStats } from '@/lib/database';
+import type { RecyclingTransaction } from '@/types/recycling-transaction';
 import { formatDateTime, formatWeight } from '@/lib/recycling';
 import { useAuth } from '@/providers/auth-provider';
 
