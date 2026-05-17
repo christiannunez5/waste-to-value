@@ -1,28 +1,38 @@
-import * as Crypto from 'expo-crypto';
-import * as SQLite from 'expo-sqlite';
+import * as Crypto from "expo-crypto";
+import * as SQLite from "expo-sqlite";
 
-import { calculatePoints, getStartOfMonth, getStartOfWeek } from '@/lib/recycling';
-import type { LeaderboardRowRaw, RedemptionRow, RewardRow, TransactionRow, UserRow } from '@/types/database';
-import type { RecyclingTransaction } from '@/types/recycling-transaction';
-import type { Redemption } from '@/types/redemption';
-import type { Reward } from '@/types/reward';
-import type { WasteType } from '@/types/recycling';
-import type { User } from '@/types/user';
+import {
+  calculatePoints,
+  getStartOfMonth,
+  getStartOfWeek,
+} from "@/lib/recycling";
+import type {
+  LeaderboardRowRaw,
+  RedemptionRow,
+  RewardRow,
+  TransactionRow,
+  UserRow,
+} from "@/types/database";
+import type { RecyclingTransaction } from "@/types/recycling-transaction";
+import type { Redemption } from "@/types/redemption";
+import type { Reward } from "@/types/reward";
+import type { WasteType } from "@/types/recycling";
+import type { User } from "@/types/user";
 
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-const rewards: Omit<Reward, 'id'>[] = [
-  { name: 'Eco Bag', pointsRequired: 4000 },
-  { name: 'Canned Goods', pointsRequired: 5000 },
-  { name: 'Rice 2kg', pointsRequired: 8000 },
-  { name: 'School Supplies', pointsRequired: 15000 },
-  { name: 'GCash ₱200', pointsRequired: 40000 },
+const rewards: Omit<Reward, "id">[] = [
+  { name: "Eco Bag", pointsRequired: 4000 },
+  { name: "Canned Goods", pointsRequired: 5000 },
+  { name: "Rice 2kg", pointsRequired: 8000 },
+  { name: "GCash ₱200", pointsRequired: 10000 },
+  { name: "School Supplies", pointsRequired: 15000 },
 ];
 
 const demoUsers = [
-  { username: 'Barangay Green Team', points: 1780, totalWeight: 14100 },
-  { username: 'Eco Club', points: 1220, totalWeight: 8300 },
-  { username: 'Volunteer Ana', points: 640, totalWeight: 4100 },
+  { username: "Barangay Green Team", points: 1780, totalWeight: 14100 },
+  { username: "Eco Club", points: 1220, totalWeight: 8300 },
+  { username: "Volunteer Ana", points: 640, totalWeight: 4100 },
 ];
 
 function mapUser(row: UserRow): User {
@@ -66,7 +76,7 @@ function mapRedemption(row: RedemptionRow): Redemption {
 }
 
 async function getDatabase() {
-  databasePromise ??= SQLite.openDatabaseAsync('waste-to-value.db');
+  databasePromise ??= SQLite.openDatabaseAsync("waste-to-value.db");
   return databasePromise;
 }
 
@@ -115,26 +125,26 @@ export async function initializeDatabase() {
   `);
 
   await db.runAsync(
-    'UPDATE rewards SET name = ? WHERE name = ? AND NOT EXISTS (SELECT 1 FROM rewards WHERE name = ?)',
-    'GCash ₱200',
-    'GCash ₱50',
-    'GCash ₱200',
+    "UPDATE rewards SET name = ? WHERE name = ? AND NOT EXISTS (SELECT 1 FROM rewards WHERE name = ?)",
+    "GCash ₱200",
+    "GCash ₱50",
+    "GCash ₱200",
   );
   await db.runAsync(
-    'UPDATE rewards SET name = ? WHERE name = ? AND NOT EXISTS (SELECT 1 FROM rewards WHERE name = ?)',
-    'Rice 2kg',
-    'Rice 1kg',
-    'Rice 2kg',
+    "UPDATE rewards SET name = ? WHERE name = ? AND NOT EXISTS (SELECT 1 FROM rewards WHERE name = ?)",
+    "Rice 2kg",
+    "Rice 1kg",
+    "Rice 2kg",
   );
 
   for (const reward of rewards) {
     await db.runAsync(
-      'INSERT OR IGNORE INTO rewards (name, points_required) VALUES (?, ?)',
+      "INSERT OR IGNORE INTO rewards (name, points_required) VALUES (?, ?)",
       reward.name,
       reward.pointsRequired,
     );
     await db.runAsync(
-      'UPDATE rewards SET points_required = ? WHERE name = ?',
+      "UPDATE rewards SET points_required = ? WHERE name = ?",
       reward.pointsRequired,
       reward.name,
     );
@@ -146,32 +156,49 @@ export async function initializeDatabase() {
 
   if (!demoCount?.count) {
     for (const user of demoUsers) {
-      const createdAt = new Date(Date.now() - 1000 * 60 * 60 * 24 * (demoUsers.indexOf(user) + 1)).toISOString();
+      const createdAt = new Date(
+        Date.now() - 1000 * 60 * 60 * 24 * (demoUsers.indexOf(user) + 1),
+      ).toISOString();
       const result = await db.runAsync(
-        'INSERT INTO users (username, username_key, password_hash, points, total_weight, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        "INSERT INTO users (username, username_key, password_hash, points, total_weight, created_at) VALUES (?, ?, ?, ?, ?, ?)",
         user.username,
         user.username.toLowerCase(),
-        'seeded-demo-user',
+        "seeded-demo-user",
         user.points,
         user.totalWeight,
         createdAt,
       );
 
-      await seedDemoTransactions(result.lastInsertRowId, user.points, user.totalWeight);
+      await seedDemoTransactions(
+        result.lastInsertRowId,
+        user.points,
+        user.totalWeight,
+      );
     }
   }
 }
 
-async function seedDemoTransactions(userId: number, targetPoints: number, targetWeight: number) {
+async function seedDemoTransactions(
+  userId: number,
+  targetPoints: number,
+  targetWeight: number,
+) {
   const db = await getDatabase();
   const weight = Math.round(targetWeight / 4);
-  const wasteTypes: WasteType[] = ['Plastic Bottle', 'Sachet', 'Aluminum', 'Mixed Waste'];
+  const wasteTypes: WasteType[] = [
+    "Plastic Bottle",
+    "Sachet",
+    "Aluminum",
+    "Mixed Waste",
+  ];
 
   for (let index = 0; index < wasteTypes.length; index += 1) {
     const wasteType = wasteTypes[index];
-    const createdAt = new Date(Date.now() - 1000 * 60 * 60 * 24 * index).toISOString();
+    const createdAt = new Date(
+      Date.now() - 1000 * 60 * 60 * 24 * index,
+    ).toISOString();
     await db.runAsync(
-      'INSERT INTO recycling_transactions (user_id, waste_type, weight_grams, points, created_at) VALUES (?, ?, ?, ?, ?)',
+      "INSERT INTO recycling_transactions (user_id, waste_type, weight_grams, points, created_at) VALUES (?, ?, ?, ?, ?)",
       userId,
       wasteType,
       weight,
@@ -193,24 +220,27 @@ export async function registerUser(username: string, password: string) {
   const usernameKey = cleanUsername.toLowerCase();
 
   if (cleanUsername.length < 3) {
-    throw new Error('Username must be at least 3 characters.');
+    throw new Error("Username must be at least 3 characters.");
   }
 
   if (password.length < 6) {
-    throw new Error('Password must be at least 6 characters.');
+    throw new Error("Password must be at least 6 characters.");
   }
 
   const db = await getDatabase();
-  const existing = await db.getFirstAsync<UserRow>('SELECT * FROM users WHERE username_key = ?', usernameKey);
+  const existing = await db.getFirstAsync<UserRow>(
+    "SELECT * FROM users WHERE username_key = ?",
+    usernameKey,
+  );
 
   if (existing) {
-    throw new Error('That username is already registered.');
+    throw new Error("That username is already registered.");
   }
 
   const now = new Date().toISOString();
   const passwordHash = await hashPassword(cleanUsername, password);
   const result = await db.runAsync(
-    'INSERT INTO users (username, username_key, password_hash, points, total_weight, created_at) VALUES (?, ?, ?, 0, 0, ?)',
+    "INSERT INTO users (username, username_key, password_hash, points, total_weight, created_at) VALUES (?, ?, ?, 0, 0, ?)",
     cleanUsername,
     usernameKey,
     passwordHash,
@@ -222,31 +252,39 @@ export async function registerUser(username: string, password: string) {
 
 export async function loginUser(username: string, password: string) {
   const cleanUsername = username.trim();
-  const row = await (await getDatabase()).getFirstAsync<UserRow & { password_hash: string }>(
-    'SELECT * FROM users WHERE username_key = ?',
+  const row = await (
+    await getDatabase()
+  ).getFirstAsync<UserRow & { password_hash: string }>(
+    "SELECT * FROM users WHERE username_key = ?",
     cleanUsername.toLowerCase(),
   );
 
-  if (!row || row.password_hash === 'seeded-demo-user') {
-    throw new Error('Invalid username or password.');
+  if (!row || row.password_hash === "seeded-demo-user") {
+    throw new Error("Invalid username or password.");
   }
 
   const passwordHash = await hashPassword(cleanUsername, password);
   if (passwordHash !== row.password_hash) {
-    throw new Error('Invalid username or password.');
+    throw new Error("Invalid username or password.");
   }
 
   return mapUser(row);
 }
 
 export async function getUserById(userId: number) {
-  const row = await (await getDatabase()).getFirstAsync<UserRow>('SELECT * FROM users WHERE id = ?', userId);
+  const row = await (
+    await getDatabase()
+  ).getFirstAsync<UserRow>("SELECT * FROM users WHERE id = ?", userId);
   return row ? mapUser(row) : null;
 }
 
-export async function addRecyclingTransaction(userId: number, wasteType: WasteType, weightGrams: number) {
+export async function addRecyclingTransaction(
+  userId: number,
+  wasteType: WasteType,
+  weightGrams: number,
+) {
   if (!Number.isFinite(weightGrams) || weightGrams <= 0) {
-    throw new Error('Weight must be greater than 0 grams.');
+    throw new Error("Weight must be greater than 0 grams.");
   }
 
   const db = await getDatabase();
@@ -255,7 +293,7 @@ export async function addRecyclingTransaction(userId: number, wasteType: WasteTy
 
   await db.withTransactionAsync(async () => {
     await db.runAsync(
-      'INSERT INTO recycling_transactions (user_id, waste_type, weight_grams, points, created_at) VALUES (?, ?, ?, ?, ?)',
+      "INSERT INTO recycling_transactions (user_id, waste_type, weight_grams, points, created_at) VALUES (?, ?, ?, ?, ?)",
       userId,
       wasteType,
       weightGrams,
@@ -264,7 +302,7 @@ export async function addRecyclingTransaction(userId: number, wasteType: WasteTy
     );
 
     await db.runAsync(
-      'UPDATE users SET points = points + ?, total_weight = total_weight + ? WHERE id = ?',
+      "UPDATE users SET points = points + ?, total_weight = total_weight + ? WHERE id = ?",
       points,
       weightGrams,
       userId,
@@ -276,16 +314,20 @@ export async function addRecyclingTransaction(userId: number, wasteType: WasteTy
 
 export async function getTransactions(userId: number, limit?: number) {
   const sql = limit
-    ? 'SELECT * FROM recycling_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
-    : 'SELECT * FROM recycling_transactions WHERE user_id = ? ORDER BY created_at DESC';
+    ? "SELECT * FROM recycling_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?"
+    : "SELECT * FROM recycling_transactions WHERE user_id = ? ORDER BY created_at DESC";
   const params = limit ? [userId, limit] : [userId];
-  const rows = await (await getDatabase()).getAllAsync<TransactionRow>(sql, params);
+  const rows = await (
+    await getDatabase()
+  ).getAllAsync<TransactionRow>(sql, params);
   return rows.map(mapTransaction);
 }
 
 export async function getWeeklyStats(userId: number) {
-  const row = await (await getDatabase()).getFirstAsync<{ weight: number | null; points: number | null }>(
-    'SELECT SUM(weight_grams) AS weight, SUM(points) AS points FROM recycling_transactions WHERE user_id = ? AND created_at >= ?',
+  const row = await (
+    await getDatabase()
+  ).getFirstAsync<{ weight: number | null; points: number | null }>(
+    "SELECT SUM(weight_grams) AS weight, SUM(points) AS points FROM recycling_transactions WHERE user_id = ? AND created_at >= ?",
     userId,
     getStartOfWeek(),
   );
@@ -297,29 +339,42 @@ export async function getWeeklyStats(userId: number) {
 }
 
 export async function getRewards() {
-  const rows = await (await getDatabase()).getAllAsync<RewardRow>('SELECT * FROM rewards ORDER BY points_required ASC');
+  const rows = await (
+    await getDatabase()
+  ).getAllAsync<RewardRow>(
+    "SELECT * FROM rewards ORDER BY points_required ASC",
+  );
   return rows.map(mapReward);
 }
 
 export async function redeemReward(userId: number, rewardId: number) {
   const db = await getDatabase();
   const user = await getUserById(userId);
-  const reward = await db.getFirstAsync<RewardRow>('SELECT * FROM rewards WHERE id = ?', rewardId);
+  const reward = await db.getFirstAsync<RewardRow>(
+    "SELECT * FROM rewards WHERE id = ?",
+    rewardId,
+  );
 
   if (!user || !reward) {
-    throw new Error('Reward is no longer available.');
+    throw new Error("Reward is no longer available.");
   }
 
   if (user.points < reward.points_required) {
-    throw new Error(`You need ${reward.points_required - user.points} more points.`);
+    throw new Error(
+      `You need ${reward.points_required - user.points} more points.`,
+    );
   }
 
   const createdAt = new Date().toISOString();
 
   await db.withTransactionAsync(async () => {
-    await db.runAsync('UPDATE users SET points = points - ? WHERE id = ?', reward.points_required, userId);
     await db.runAsync(
-      'INSERT INTO reward_redemptions (user_id, reward_id, reward_name, points_spent, created_at) VALUES (?, ?, ?, ?, ?)',
+      "UPDATE users SET points = points - ? WHERE id = ?",
+      reward.points_required,
+      userId,
+    );
+    await db.runAsync(
+      "INSERT INTO reward_redemptions (user_id, reward_id, reward_name, points_spent, created_at) VALUES (?, ?, ?, ?, ?)",
       userId,
       reward.id,
       reward.name,
@@ -332,15 +387,24 @@ export async function redeemReward(userId: number, rewardId: number) {
 }
 
 export async function getRedemptions(userId: number) {
-  const rows = await (await getDatabase()).getAllAsync<RedemptionRow>(
-    'SELECT * FROM reward_redemptions WHERE user_id = ? ORDER BY created_at DESC',
+  const rows = await (
+    await getDatabase()
+  ).getAllAsync<RedemptionRow>(
+    "SELECT * FROM reward_redemptions WHERE user_id = ? ORDER BY created_at DESC",
     userId,
   );
   return rows.map(mapRedemption);
 }
 
-export async function getLeaderboard(period: 'weekly' | 'monthly' | 'all-time') {
-  const since = period === 'weekly' ? getStartOfWeek() : period === 'monthly' ? getStartOfMonth() : null;
+export async function getLeaderboard(
+  period: "weekly" | "monthly" | "all-time",
+) {
+  const since =
+    period === "weekly"
+      ? getStartOfWeek()
+      : period === "monthly"
+        ? getStartOfMonth()
+        : null;
   const db = await getDatabase();
   const rows = since
     ? await db.getAllAsync<LeaderboardRowRaw>(
