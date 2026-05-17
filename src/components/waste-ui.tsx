@@ -1,19 +1,25 @@
-import { Link, type Href } from 'expo-router';
-import React from 'react';
+import { Link, type Href } from "expo-router";
+import React from "react";
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
+  type StyleProp,
   Text,
   type TextStyle,
   View,
   type ViewStyle,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { BottomTabInset, Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import {
+  BottomTabInset,
+  Fonts,
+  MaxContentWidth,
+  Spacing,
+} from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 
 export function Screen({
   children,
@@ -37,14 +43,18 @@ export function Screen({
           paddingTop: Math.max(insets.top, Spacing.three),
           paddingBottom: insets.bottom + BottomTabInset + Spacing.six,
         },
-      ]}>
+      ]}
+    >
       <View style={styles.contentWidth}>
         <View style={styles.header}>
           <Text selectable style={[styles.title, { color: theme.text }]}>
             {title}
           </Text>
           {subtitle ? (
-            <Text selectable style={[styles.subtitle, { color: theme.textSecondary }]}>
+            <Text
+              selectable
+              style={[styles.subtitle, { color: theme.textSecondary }]}
+            >
               {subtitle}
             </Text>
           ) : null}
@@ -55,11 +65,23 @@ export function Screen({
   );
 }
 
-export function Card({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
+export function Card({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: ViewStyle;
+}) {
   const theme = useTheme();
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }, style]}>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        style,
+      ]}
+    >
       {children}
     </View>
   );
@@ -68,7 +90,9 @@ export function Card({ children, style }: { children: React.ReactNode; style?: V
 export function SectionTitle({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
 
-  return <Text style={[styles.sectionTitle, { color: theme.text }]}>{children}</Text>;
+  return (
+    <Text style={[styles.sectionTitle, { color: theme.text }]}>{children}</Text>
+  );
 }
 
 export function BodyText({
@@ -77,13 +101,20 @@ export function BodyText({
   muted,
 }: {
   children: React.ReactNode;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   muted?: boolean;
 }) {
   const theme = useTheme();
 
   return (
-    <Text selectable style={[styles.body, { color: muted ? theme.textSecondary : theme.text }, style]}>
+    <Text
+      selectable
+      style={[
+        styles.body,
+        { color: muted ? theme.textSecondary : theme.text },
+        style,
+      ]}
+    >
       {children}
     </Text>
   );
@@ -93,17 +124,21 @@ export function PrimaryButton({
   title,
   onPress,
   disabled,
-  variant = 'primary',
+  variant = "primary",
 }: {
   title: string;
   onPress: () => void;
   disabled?: boolean;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: "primary" | "secondary" | "danger";
 }) {
   const theme = useTheme();
   const backgroundColor =
-    variant === 'danger' ? theme.danger : variant === 'secondary' ? '#FFFFFF' : theme.primary;
-  const color = '#FFFFFF';
+    variant === "danger"
+      ? theme.danger
+      : variant === "secondary"
+        ? theme.backgroundElement
+        : theme.primary;
+  const color = variant === "secondary" ? theme.primaryDark : "#FFFFFF";
 
   return (
     <Pressable
@@ -111,8 +146,13 @@ export function PrimaryButton({
       disabled={disabled}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor, opacity: disabled ? 0.45 : pressed ? 0.78 : 1 },
-      ]}>
+        {
+          backgroundColor,
+          borderColor: variant === "secondary" ? theme.border : backgroundColor,
+          opacity: disabled ? 0.45 : pressed ? 0.78 : 1,
+        },
+      ]}
+    >
       <Text style={[styles.buttonText, { color }]}>{title}</Text>
     </Pressable>
   );
@@ -124,7 +164,11 @@ export function LinkButton({ href, title }: { href: Href; title: string }) {
       <Pressable>
         {({ pressed }) => (
           <View style={{ opacity: pressed ? 0.7 : 1 }}>
-            <PrimaryButton title={title} onPress={() => {}} variant="secondary" />
+            <PrimaryButton
+              title={title}
+              onPress={() => {}}
+              variant="secondary"
+            />
           </View>
         )}
       </Pressable>
@@ -132,7 +176,13 @@ export function LinkButton({ href, title }: { href: Href; title: string }) {
   );
 }
 
-export function Pill({ children, selected }: { children: React.ReactNode; selected?: boolean }) {
+export function Pill({
+  children,
+  selected,
+}: {
+  children: React.ReactNode;
+  selected?: boolean;
+}) {
   const theme = useTheme();
 
   return (
@@ -143,8 +193,13 @@ export function Pill({ children, selected }: { children: React.ReactNode; select
           backgroundColor: selected ? theme.primary : theme.backgroundElement,
           borderColor: selected ? theme.primaryDark : theme.border,
         },
-      ]}>
-      <Text style={[styles.pillText, { color: selected ? '#FFFFFF' : theme.text }]}>{children}</Text>
+      ]}
+    >
+      <Text
+        style={[styles.pillText, { color: selected ? "#FFFFFF" : theme.text }]}
+      >
+        {children}
+      </Text>
     </View>
   );
 }
@@ -171,12 +226,12 @@ export function EmptyState({ title, body }: { title: string; body: string }) {
 const styles = StyleSheet.create({
   screenContent: {
     flexGrow: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: Spacing.three,
     gap: Spacing.three,
   },
   contentWidth: {
-    width: '100%',
+    width: "100%",
     maxWidth: MaxContentWidth,
     gap: Spacing.three,
   },
@@ -184,7 +239,7 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   title: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.extraBold,
     fontSize: 26,
     lineHeight: 32,
     fontWeight: 800,
@@ -200,10 +255,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: Spacing.three,
     gap: Spacing.two,
-    boxShadow: '0 4px 16px rgba(16, 46, 26, 0.08)',
   },
   sectionTitle: {
-    fontFamily: Fonts.sans,
+    fontFamily: "Lexend",
     fontSize: 17,
     lineHeight: 23,
     fontWeight: 800,
@@ -217,13 +271,13 @@ const styles = StyleSheet.create({
   button: {
     minHeight: 48,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: Spacing.three,
-    boxShadow: '0 3px 10px rgba(39, 127, 54, 0.18)',
+    borderWidth: StyleSheet.hairlineWidth,
   },
   buttonText: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.extraBold,
     fontSize: 14,
     fontWeight: 800,
   },
@@ -234,21 +288,21 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     minWidth: 76,
     minHeight: 82,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   pillText: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.extraBold,
     fontSize: 12,
     fontWeight: 800,
-    textAlign: 'center',
+    textAlign: "center",
   },
   loading: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   empty: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
   },
 });

@@ -16,6 +16,14 @@ export default function AuthScreen() {
   const [error, setError] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
 
+  function switchMode(nextMode: 'login' | 'register') {
+    if (mode === nextMode) return;
+    setMode(nextMode);
+    setUsername('');
+    setPassword('');
+    setError('');
+  }
+
   if (initializing) {
     return <LoadingState />;
   }
@@ -47,7 +55,7 @@ export default function AuthScreen() {
         <Text style={styles.recycleMark}>♻</Text>
         <Text style={[styles.brandWaste, { color: theme.primaryDark }]}>WASTE</Text>
         <Text style={[styles.brandTo, { color: theme.primaryDark }]}>TO</Text>
-        <Text style={[styles.brandValue, { color: '#4B9938' }]}>VALUE</Text>
+        <Text style={[styles.brandValue, { color: theme.primary }]}>VALUE</Text>
         <Text style={[styles.tagline, { color: theme.text }]}>Turn your waste{'\n'}into rewards.</Text>
       </View>
 
@@ -56,10 +64,7 @@ export default function AuthScreen() {
           {(['login', 'register'] as const).map((nextMode) => (
             <Pressable
               key={nextMode}
-              onPress={() => {
-                setMode(nextMode);
-                setError('');
-              }}
+              onPress={() => switchMode(nextMode)}
               style={[
                 styles.switchButton,
                 { backgroundColor: mode === nextMode ? theme.primary : theme.backgroundSelected },
@@ -77,7 +82,7 @@ export default function AuthScreen() {
           placeholder="Username or Email"
           placeholderTextColor={theme.textSecondary}
           autoCapitalize="none"
-          style={[styles.input, { borderColor: theme.border, color: theme.text, backgroundColor: '#FFFFFF' }]}
+          style={[styles.input, { borderColor: theme.border, color: theme.text, backgroundColor: theme.backgroundElement }]}
         />
         <TextInput
           value={password}
@@ -85,7 +90,7 @@ export default function AuthScreen() {
           placeholder="Password"
           placeholderTextColor={theme.textSecondary}
           secureTextEntry
-          style={[styles.input, { borderColor: theme.border, color: theme.text, backgroundColor: '#FFFFFF' }]}
+          style={[styles.input, { borderColor: theme.border, color: theme.text, backgroundColor: theme.backgroundElement }]}
         />
         {mode === 'login' ? <Text style={[styles.forgot, { color: theme.primaryDark }]}>Forgot Password?</Text> : null}
         {error ? <BodyText style={{ color: theme.danger }}>{error}</BodyText> : null}
@@ -94,10 +99,10 @@ export default function AuthScreen() {
           onPress={handleSubmit}
           disabled={submitting}
         />
-        <Pressable onPress={() => setMode(mode === 'login' ? 'register' : 'login')} style={styles.accountLink}>
+        <Pressable onPress={() => switchMode(mode === 'login' ? 'register' : 'login')} style={styles.accountLink}>
           <Text style={[styles.accountText, { color: theme.text }]}>
             {mode === 'login' ? "Don’t have an account? " : 'Already have an account? '}
-            <Text style={{ color: theme.primaryDark, fontWeight: 900 }}>
+            <Text style={{ color: theme.primaryDark, fontFamily: Fonts.black, fontWeight: 900 }}>
               {mode === 'login' ? 'Register' : 'Login'}
             </Text>
           </Text>
@@ -108,7 +113,7 @@ export default function AuthScreen() {
         <View style={[styles.tree, styles.treeLeft]} />
         <View style={[styles.tree, styles.treeRight]} />
         <View style={[styles.bin, { backgroundColor: theme.primary }]} />
-        <View style={[styles.binSmall, { backgroundColor: '#58A33F' }]} />
+        <View style={[styles.binSmall, { backgroundColor: theme.primaryDark }]} />
       </View>
     </View>
   );
@@ -127,32 +132,33 @@ const styles = StyleSheet.create({
     gap: 0,
   },
   recycleMark: {
+    fontFamily: Fonts.black,
     fontSize: 96,
     lineHeight: 104,
-    color: '#36883B',
+    color: '#2E8B3C',
   },
   brandWaste: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 42,
     lineHeight: 44,
     fontWeight: 900,
     letterSpacing: 2,
   },
   brandTo: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 25,
     lineHeight: 25,
     fontWeight: 900,
   },
   brandValue: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 42,
     lineHeight: 44,
     fontWeight: 900,
     letterSpacing: 2,
   },
   tagline: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.semiBold,
     marginTop: Spacing.two,
     fontSize: 18,
     lineHeight: 25,
@@ -165,7 +171,6 @@ const styles = StyleSheet.create({
     padding: 0,
     backgroundColor: 'transparent',
     borderWidth: 0,
-    boxShadow: 'none',
   },
   switchRow: {
     flexDirection: 'row',
@@ -180,7 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   switchText: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.extraBold,
     fontWeight: 800,
   },
   input: {
@@ -188,14 +193,13 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 10,
     paddingHorizontal: Spacing.three,
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.semiBold,
     fontSize: 14,
     fontWeight: 600,
-    boxShadow: '0 2px 10px rgba(16, 46, 26, 0.06)',
   },
   forgot: {
     alignSelf: 'flex-end',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.bold,
     fontSize: 12,
     fontWeight: 700,
     marginBottom: Spacing.two,
@@ -205,14 +209,14 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.two,
   },
   accountText: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.semiBold,
     fontSize: 14,
     fontWeight: 600,
   },
   landscape: {
     minHeight: 130,
     borderRadius: 18,
-    backgroundColor: '#DFF2D4',
+    backgroundColor: '#DFF3E3',
     overflow: 'hidden',
     justifyContent: 'flex-end',
   },

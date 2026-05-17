@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   background: {
     borderRadius: 40,
-    experimental_backgroundImage: `linear-gradient(180deg, #3C9FFE, #0274DF)`,
+    backgroundColor: '#2E8B3C',
     width: 128,
     height: 128,
     position: 'absolute',
