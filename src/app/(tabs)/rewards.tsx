@@ -1,27 +1,40 @@
-import { Redirect } from 'expo-router';
-import { Image } from 'expo-image';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Redirect } from "expo-router";
+import { Image } from "expo-image";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-import { BodyText, Card, EmptyState, LoadingState, PrimaryButton, Screen, SectionTitle } from '@/components/waste-ui';
-import { Fonts, Spacing } from '@/constants/theme';
-import { getRedemptions, getRewards, redeemReward } from '@/lib/database';
-import type { Redemption } from '@/types/redemption';
-import type { Reward } from '@/types/reward';
-import { formatDateTime } from '@/lib/recycling';
-import { useAuth } from '@/providers/auth-provider';
+import {
+  BodyText,
+  Card,
+  EmptyState,
+  LoadingState,
+  PrimaryButton,
+  Screen,
+  SectionTitle,
+} from "@/components/waste-ui";
+import { Fonts, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+import { getRedemptions, getRewards, redeemReward } from "@/lib/database";
+import type { Redemption } from "@/types/redemption";
+import type { Reward } from "@/types/reward";
+import { formatDateTime } from "@/lib/recycling";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function RewardsScreen() {
+  const theme = useTheme();
   const { user, initializing, refreshUser } = useAuth();
   const [rewards, setRewards] = React.useState<Reward[]>([]);
   const [redemptions, setRedemptions] = React.useState<Redemption[]>([]);
-  const [message, setMessage] = React.useState('');
+  const [message, setMessage] = React.useState("");
   const [redeemingId, setRedeemingId] = React.useState<number | null>(null);
 
   const load = React.useCallback(async () => {
     if (!user) return;
 
-    const [nextRewards, nextRedemptions] = await Promise.all([getRewards(), getRedemptions(user.id)]);
+    const [nextRewards, nextRedemptions] = await Promise.all([
+      getRewards(),
+      getRedemptions(user.id),
+    ]);
     setRewards(nextRewards);
     setRedemptions(nextRedemptions);
   }, [user]);
@@ -39,7 +52,7 @@ export default function RewardsScreen() {
   }
 
   async function handleRedeem(reward: Reward) {
-    setMessage('');
+    setMessage("");
     setRedeemingId(reward.id);
 
     try {
@@ -48,7 +61,11 @@ export default function RewardsScreen() {
       await load();
       setMessage(`${reward.name} redeemed successfully.`);
     } catch (caughtError) {
-      setMessage(caughtError instanceof Error ? caughtError.message : 'Unable to redeem reward.');
+      setMessage(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unable to redeem reward.",
+      );
     } finally {
       setRedeemingId(null);
     }
@@ -56,9 +73,16 @@ export default function RewardsScreen() {
 
   return (
     <Screen title="View Rewards" subtitle="">
-      <View style={styles.pointsPill}>
+      <View
+        style={[
+          styles.pointsPill,
+          { backgroundColor: theme.backgroundElement },
+        ]}
+      >
         <Text style={styles.coinText}>★</Text>
-        <Text style={styles.pointsPillText}>{user.points.toLocaleString()} PTS</Text>
+        <Text style={[styles.pointsPillText, { color: theme.text }]}>
+          {user.points.toLocaleString()} PTS
+        </Text>
       </View>
       {message ? (
         <Card>
@@ -73,13 +97,21 @@ export default function RewardsScreen() {
         return (
           <Card key={reward.id}>
             <View style={styles.rowBetween}>
-              <Image source={rewardImage(reward.name)} style={styles.rewardImage} contentFit="cover" />
+              <Image
+                source={rewardImage(reward.name)}
+                style={styles.rewardImage}
+                contentFit="cover"
+              />
               <View style={styles.rewardText}>
                 <SectionTitle>{reward.name}</SectionTitle>
-                <Text style={styles.rewardPoints}>{reward.pointsRequired.toLocaleString()} PTS</Text>
+                <Text
+                  style={[styles.rewardPoints, { color: theme.primaryDark }]}
+                >
+                  {reward.pointsRequired.toLocaleString()} PTS
+                </Text>
               </View>
               <PrimaryButton
-                title={canRedeem ? 'Redeem' : 'Locked'}
+                title={canRedeem ? "Redeem" : "Locked"}
                 onPress={() => handleRedeem(reward)}
                 disabled={!canRedeem || redeemingId === reward.id}
               />
@@ -100,62 +132,67 @@ export default function RewardsScreen() {
           </Card>
         ))
       ) : (
-        <EmptyState title="No rewards claimed" body="Redeemed rewards will appear here after points are spent." />
+        <EmptyState
+          title="No rewards claimed"
+          body="Redeemed rewards will appear here after points are spent."
+        />
       )}
     </Screen>
   );
 }
 
 function rewardImage(name: string) {
-  if (name.includes('Eco')) return require('@/assets/images/rewards/eco-bag.png');
-  if (name.includes('Rice')) return require('@/assets/images/rewards/rice.png');
-  if (name.includes('Canned')) return require('@/assets/images/rewards/canned-goods.png');
-  if (name.includes('GCash')) return require('@/assets/images/rewards/gcash.png');
-  return require('@/assets/images/rewards/school-supplies.png');
+  if (name.includes("Eco"))
+    return require("@/assets/images/rewards/eco-bag.png");
+  if (name.includes("Rice")) return require("@/assets/images/rewards/rice.png");
+  if (name.includes("Canned"))
+    return require("@/assets/images/rewards/canned-goods.png");
+  if (name.includes("GCash"))
+    return require("@/assets/images/rewards/gcash.png");
+  return require("@/assets/images/rewards/school-supplies.png");
 }
 
 const styles = StyleSheet.create({
   pointsPill: {
-    position: 'absolute',
+    position: "absolute",
     top: 12,
     right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 5,
     paddingHorizontal: 12,
     minHeight: 34,
     borderRadius: 17,
-    backgroundColor: '#F4F5EC',
+    backgroundColor: "#FFFFFF",
   },
   coinText: {
-    color: '#F7B718',
+    color: "#F4C542",
+    fontFamily: Fonts.black,
     fontSize: 16,
     fontWeight: 900,
   },
   pointsPillText: {
-    color: '#102E1A',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 12,
     fontWeight: 900,
   },
   rowBetween: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.two,
   },
   rewardImage: {
     width: 92,
     height: 92,
     borderRadius: 9,
-    backgroundColor: '#EEF4E8',
+    backgroundColor: "#F3FAF4",
   },
   rewardText: {
     flex: 1,
     gap: Spacing.one,
   },
   rewardPoints: {
-    color: '#0E6E27',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 22,
     fontWeight: 900,
   },

@@ -58,18 +58,27 @@ export function useBleScale(onWeight: (weightGrams: number) => void) {
   const managerRef = React.useRef<any>(null);
   const subscriptionRef = React.useRef<{ remove: () => void } | null>(null);
   const scanTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = React.useRef(true);
   const [status, setStatus] = React.useState<BleStatus>('idle');
   const [devices, setDevices] = React.useState<BleDevice[]>([]);
   const [message, setMessage] = React.useState('Ready to scan for ESP32 scale.');
 
   React.useEffect(() => {
     return () => {
+      mountedRef.current = false;
       subscriptionRef.current?.remove();
       if (scanTimeoutRef.current) {
         clearTimeout(scanTimeoutRef.current);
+        scanTimeoutRef.current = null;
       }
-      managerRef.current?.stopDeviceScan?.();
-      managerRef.current?.destroy?.();
+
+      try {
+        managerRef.current?.stopDeviceScan?.();
+        managerRef.current?.destroy?.();
+      } catch {
+        // The native BLE manager may already be torn down during fast navigation.
+      }
+      managerRef.current = null;
     };
   }, []);
 
@@ -81,13 +90,25 @@ export function useBleScale(onWeight: (weightGrams: number) => void) {
     }
 
     const permitted = await requestAndroidPermissions();
+    if (!mountedRef.current) {
+      return;
+    }
+
     if (!permitted) {
       setStatus('permission-denied');
       setMessage('Bluetooth permissions are required to read the ESP32 scale.');
       return;
     }
 
-    managerRef.current ??= await getBleManager();
+    const manager = managerRef.current ?? (await getBleManager());
+    if (!mountedRef.current) {
+      try {
+        manager?.destroy?.();
+      } catch {}
+      return;
+    }
+
+    managerRef.current = manager;
     if (!managerRef.current) {
       setStatus('unsupported');
       setMessage('Bluetooth native module is unavailable. Use an Android development build.');
@@ -98,36 +119,55 @@ export function useBleScale(onWeight: (weightGrams: number) => void) {
     setStatus('scanning');
     setMessage('Scanning for WasteScale...');
 
-    managerRef.current.startDeviceScan([ESP32_SCALE_SERVICE_UUID], null, (error: unknown, device: any) => {
-      if (error) {
-        setStatus('error');
-        setMessage('Bluetooth scan failed. Check that Bluetooth and location are enabled.');
-        managerRef.current?.stopDeviceScan?.();
-        return;
-      }
-
-      if (!device?.id) {
-        return;
-      }
-
-      const deviceName = device.name ?? device.localName ?? null;
-      const isScale = deviceName === ESP32_SCALE_DEVICE_NAME || device.serviceUUIDs?.includes(ESP32_SCALE_SERVICE_UUID);
-
-      if (!isScale) {
-        return;
-      }
-
-      setDevices((currentDevices) => {
-        if (currentDevices.some((currentDevice) => currentDevice.id === device.id)) {
-          return currentDevices;
+    try {
+      managerRef.current.startDeviceScan([ESP32_SCALE_SERVICE_UUID], null, (error: unknown, device: any) => {
+        if (!mountedRef.current) {
+          return;
         }
 
-        return [...currentDevices, { id: device.id, name: deviceName }];
+        if (error) {
+          setStatus('error');
+          setMessage('Bluetooth scan failed. Check that Bluetooth and location are enabled.');
+          try {
+            managerRef.current?.stopDeviceScan?.();
+          } catch {}
+          return;
+        }
+
+        if (!device?.id) {
+          return;
+        }
+
+        const deviceName = device.name ?? device.localName ?? null;
+        const isScale = deviceName === ESP32_SCALE_DEVICE_NAME || device.serviceUUIDs?.includes(ESP32_SCALE_SERVICE_UUID);
+
+        if (!isScale) {
+          return;
+        }
+
+        setDevices((currentDevices) => {
+          if (currentDevices.some((currentDevice) => currentDevice.id === device.id)) {
+            return currentDevices;
+          }
+
+          return [...currentDevices, { id: device.id, name: deviceName }];
+        });
       });
-    });
+    } catch {
+      setStatus('error');
+      setMessage('Bluetooth scan failed. Check that Bluetooth and location are enabled.');
+      return;
+    }
 
     scanTimeoutRef.current = setTimeout(() => {
-      managerRef.current?.stopDeviceScan?.();
+      if (!mountedRef.current) {
+        return;
+      }
+
+      try {
+        managerRef.current?.stopDeviceScan?.();
+      } catch {}
+      scanTimeoutRef.current = null;
       setStatus('idle');
       setMessage('Scan finished. Start another scan if the ESP32 is now powered on.');
     }, 12000);
@@ -139,20 +179,35 @@ export function useBleScale(onWeight: (weightGrams: number) => void) {
         return;
       }
 
-      managerRef.current.stopDeviceScan();
+      try {
+        managerRef.current.stopDeviceScan();
+      } catch {}
       if (scanTimeoutRef.current) {
         clearTimeout(scanTimeoutRef.current);
+        scanTimeoutRef.current = null;
       }
 
       try {
         setMessage('Connecting to ESP32 scale...');
         const device = await managerRef.current.connectToDevice(deviceId);
+        if (!mountedRef.current) {
+          return;
+        }
+
         await device.discoverAllServicesAndCharacteristics();
+        if (!mountedRef.current) {
+          return;
+        }
+
         subscriptionRef.current?.remove();
         subscriptionRef.current = device.monitorCharacteristicForService(
           ESP32_SCALE_SERVICE_UUID,
           ESP32_SCALE_WEIGHT_CHARACTERISTIC_UUID,
           (error: unknown, characteristic: { value?: string } | null) => {
+            if (!mountedRef.current) {
+              return;
+            }
+
             if (error) {
               setStatus('error');
               setMessage('Scale connection dropped. Reconnect and try again.');
@@ -174,6 +229,10 @@ export function useBleScale(onWeight: (weightGrams: number) => void) {
         setStatus('connected');
         setMessage('Connected. Waiting for weight notifications...');
       } catch {
+        if (!mountedRef.current) {
+          return;
+        }
+
         setStatus('error');
         setMessage('Unable to connect to the ESP32 scale.');
       }
@@ -184,6 +243,9 @@ export function useBleScale(onWeight: (weightGrams: number) => void) {
   const disconnect = React.useCallback(() => {
     subscriptionRef.current?.remove();
     subscriptionRef.current = null;
+    try {
+      managerRef.current?.stopDeviceScan?.();
+    } catch {}
     setStatus('idle');
     setMessage('Disconnected from scale.');
   }, []);

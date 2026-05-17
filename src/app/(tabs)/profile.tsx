@@ -4,11 +4,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BodyText, Card, LoadingState, PrimaryButton, Screen, SectionTitle } from '@/components/waste-ui';
 import { Fonts, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { getRedemptions } from '@/lib/database';
 import { formatWeight, getEcoBadge } from '@/lib/recycling';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function ProfileScreen() {
+  const theme = useTheme();
   const { user, initializing, signOut } = useAuth();
   const [redemptionCount, setRedemptionCount] = React.useState(0);
 
@@ -34,19 +36,19 @@ export default function ProfileScreen() {
   return (
     <Screen title="Profile" subtitle="Your personal recycling summary and app settings.">
       <Card style={styles.hero}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{user.username.slice(0, 1).toUpperCase()}</Text></View>
+        <View style={styles.avatar}><Text style={[styles.avatarText, { color: theme.primaryDark }]}>{user.username.slice(0, 1).toUpperCase()}</Text></View>
         <SectionTitle>{user.username}</SectionTitle>
-        <BodyText style={styles.badge}>{getEcoBadge(user.points)}</BodyText>
+        <BodyText style={[styles.badge, { color: theme.primaryDark }]}>{getEcoBadge(user.points)}</BodyText>
       </Card>
 
       <View style={styles.grid}>
         <Card style={styles.gridCard}>
           <BodyText muted>Points</BodyText>
-          <Text selectable style={styles.bigValue}>{user.points.toLocaleString()}</Text>
+          <Text selectable style={[styles.bigValue, { color: theme.primaryDark }]}>{user.points.toLocaleString()}</Text>
         </Card>
         <Card style={styles.gridCard}>
           <BodyText muted>Recycled</BodyText>
-          <Text selectable style={styles.bigValue}>{formatWeight(user.totalWeight)}</Text>
+          <Text selectable style={[styles.bigValue, { color: theme.primaryDark }]}>{formatWeight(user.totalWeight)}</Text>
         </Card>
       </View>
 
@@ -83,8 +85,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bigValue: {
-    color: '#2E8B3C',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 24,
     lineHeight: 30,
     fontWeight: 900,
@@ -92,26 +93,25 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    backgroundColor: '#F1F8E8',
+    backgroundColor: '#DFF3E3',
   },
   avatar: {
     width: 78,
     height: 78,
     borderRadius: 39,
-    backgroundColor: '#DCEFE0',
+    backgroundColor: '#F3FAF4',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: '#FFFFFF',
   },
   avatarText: {
-    color: '#0E6E27',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 32,
     fontWeight: 900,
   },
   badge: {
-    color: '#0E6E27',
+    fontFamily: Fonts.black,
     fontWeight: 900,
   },
 });

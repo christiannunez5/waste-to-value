@@ -54,7 +54,7 @@ export default function WeighScreen() {
       <Card style={styles.scaleCard}>
         <View style={styles.statusRow}>
           <SectionTitle>ESP32 HX711 Scale</SectionTitle>
-          <View style={[styles.statusPill, { backgroundColor: connected ? '#DDF4D5' : '#F4F5EC' }]}>
+          <View style={[styles.statusPill, { backgroundColor: connected ? '#DFF3E3' : '#F3FAF4' }]}>
             <Text style={[styles.statusText, { color: connected ? theme.primaryDark : theme.textSecondary }]}>
               {connected ? 'Connected' : ble.status === 'scanning' ? 'Scanning' : 'Not Connected'}
             </Text>
@@ -66,7 +66,7 @@ export default function WeighScreen() {
           <Text selectable style={styles.weightValue}>
             {weightGrams > 0 ? weightGrams.toFixed(1) : '0.0'}
           </Text>
-          <Text style={styles.weightUnit}>grams</Text>
+          <Text style={[styles.weightUnit, { color: theme.primaryDark }]}>grams</Text>
         </View>
 
         <BodyText muted>{ble.message}</BodyText>
@@ -90,7 +90,7 @@ export default function WeighScreen() {
               <BodyText>{device.name ?? 'ESP32 Scale'}</BodyText>
               <BodyText muted>{device.id}</BodyText>
             </View>
-            <Text style={styles.connectText}>Connect</Text>
+            <Text style={[styles.connectText, { color: theme.primaryDark }]}>Connect</Text>
           </Pressable>
         ))}
       </Card>
@@ -98,10 +98,10 @@ export default function WeighScreen() {
       <Card style={styles.pointsCard}>
         <BodyText style={styles.centerText}>Points Earned</BodyText>
         <View style={styles.pointsRow}>
-          <Text selectable style={styles.points}>
+          <Text selectable style={[styles.points, { color: theme.primaryDark }]}>
             {points.toLocaleString()}
           </Text>
-          <Text style={styles.pts}>PTS</Text>
+          <Text style={[styles.pts, { color: theme.primaryDark }]}>PTS</Text>
         </View>
         <BodyText style={styles.centerText}>
           {weightGrams.toFixed(1)}g x {MATERIAL_MULTIPLIERS[DEFAULT_WASTE_TYPE]} (Sachet) = {points} pts
@@ -130,36 +130,35 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
   },
   statusText: {
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 12,
     fontWeight: 900,
   },
   weightPanel: {
     minHeight: 190,
     borderRadius: 16,
-    backgroundColor: '#F1F8E8',
+    backgroundColor: '#F3FAF4',
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.one,
   },
   scaleIcon: {
-    color: '#93BD83',
-    fontFamily: Fonts.sans,
+    color: '#2E8B3C',
+    fontFamily: Fonts.black,
     fontSize: 22,
     fontWeight: 900,
     letterSpacing: 1,
   },
   weightValue: {
-    color: '#111111',
-    fontFamily: Fonts.sans,
+    color: '#1F2937',
+    fontFamily: Fonts.black,
     fontSize: 62,
     lineHeight: 68,
     fontWeight: 900,
     fontVariant: ['tabular-nums'],
   },
   weightUnit: {
-    color: '#0E6E27',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 18,
     fontWeight: 900,
   },
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
   deviceRow: {
     minHeight: 62,
     borderRadius: 12,
-    backgroundColor: '#F8FAF4',
+    backgroundColor: '#F3FAF4',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     flexDirection: 'row',
@@ -178,14 +177,13 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   connectText: {
-    color: '#0E6E27',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 13,
     fontWeight: 900,
   },
   pointsCard: {
     alignItems: 'center',
-    backgroundColor: '#EAF6DE',
+    backgroundColor: '#DFF3E3',
   },
   centerText: {
     textAlign: 'center',
@@ -196,16 +194,14 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   points: {
-    color: '#0E6E27',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 43,
     lineHeight: 50,
     fontWeight: 900,
     fontVariant: ['tabular-nums'],
   },
   pts: {
-    color: '#0E6E27',
-    fontFamily: Fonts.sans,
+    fontFamily: Fonts.black,
     fontSize: 15,
     fontWeight: 900,
     paddingBottom: 8,
