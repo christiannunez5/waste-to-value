@@ -3,11 +3,10 @@ import * as SQLite from 'expo-sqlite';
 
 import { calculatePoints, getStartOfMonth, getStartOfWeek } from '@/lib/recycling';
 import type { LeaderboardRowRaw, RedemptionRow, RewardRow, TransactionRow, UserRow } from '@/types/database';
-import type { LeaderboardRow } from '@/types/leaderboard';
 import type { RecyclingTransaction } from '@/types/recycling-transaction';
 import type { Redemption } from '@/types/redemption';
 import type { Reward } from '@/types/reward';
-import type { RewardName, WasteType } from '@/types/recycling';
+import type { WasteType } from '@/types/recycling';
 import type { User } from '@/types/user';
 
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
