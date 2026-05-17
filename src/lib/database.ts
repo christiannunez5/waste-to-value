@@ -12,11 +12,11 @@ import type { User } from '@/types/user';
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 const rewards: Omit<Reward, 'id'>[] = [
-  { name: 'Eco Bag', pointsRequired: 100 },
-  { name: 'School Supplies', pointsRequired: 200 },
-  { name: 'Rice 1kg', pointsRequired: 300 },
-  { name: 'Canned Goods', pointsRequired: 500 },
-  { name: 'GCash ₱50', pointsRequired: 800 },
+  { name: 'Rice 1kg', pointsRequired: 10000 },
+  { name: 'School Supplies', pointsRequired: 12000 },
+  { name: 'Eco Bag', pointsRequired: 14000 },
+  { name: 'Canned Goods', pointsRequired: 18000 },
+  { name: 'GCash ₱200', pointsRequired: 40000 },
 ];
 
 const demoUsers = [
@@ -114,11 +114,23 @@ export async function initializeDatabase() {
     );
   `);
 
+  await db.runAsync(
+    'UPDATE rewards SET name = ? WHERE name = ? AND NOT EXISTS (SELECT 1 FROM rewards WHERE name = ?)',
+    'GCash ₱200',
+    'GCash ₱50',
+    'GCash ₱200',
+  );
+
   for (const reward of rewards) {
     await db.runAsync(
       'INSERT OR IGNORE INTO rewards (name, points_required) VALUES (?, ?)',
       reward.name,
       reward.pointsRequired,
+    );
+    await db.runAsync(
+      'UPDATE rewards SET points_required = ? WHERE name = ?',
+      reward.pointsRequired,
+      reward.name,
     );
   }
 
