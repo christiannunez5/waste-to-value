@@ -144,7 +144,7 @@ export default function RewardsScreen() {
 function rewardImage(name: string) {
   if (name.includes("Eco"))
     return require("@/assets/images/rewards/eco-bag.png");
-  if (name.includes("Rice")) return require("@/assets/images/rewards/rice.png");
+  if (name.includes("Rice")) return require("@/assets/images/rewards/rice.jpg");
   if (name.includes("Canned"))
     return require("@/assets/images/rewards/canned-goods.png");
   if (name.includes("GCash"))
