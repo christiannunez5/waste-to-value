@@ -12,10 +12,10 @@ import type { User } from '@/types/user';
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 const rewards: Omit<Reward, 'id'>[] = [
-  { name: 'Rice 1kg', pointsRequired: 10000 },
-  { name: 'School Supplies', pointsRequired: 12000 },
-  { name: 'Eco Bag', pointsRequired: 14000 },
-  { name: 'Canned Goods', pointsRequired: 18000 },
+  { name: 'Eco Bag', pointsRequired: 4000 },
+  { name: 'Canned Goods', pointsRequired: 5000 },
+  { name: 'Rice 2kg', pointsRequired: 8000 },
+  { name: 'School Supplies', pointsRequired: 15000 },
   { name: 'GCash ₱200', pointsRequired: 40000 },
 ];
 
@@ -119,6 +119,12 @@ export async function initializeDatabase() {
     'GCash ₱200',
     'GCash ₱50',
     'GCash ₱200',
+  );
+  await db.runAsync(
+    'UPDATE rewards SET name = ? WHERE name = ? AND NOT EXISTS (SELECT 1 FROM rewards WHERE name = ?)',
+    'Rice 2kg',
+    'Rice 1kg',
+    'Rice 2kg',
   );
 
   for (const reward of rewards) {
